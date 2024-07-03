@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forums</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/css/chatRooms.css">
+    <script src="/js/chatRooms.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Forums</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Welcome, <span th:text="${username}">Username</span>!</h5>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Create a New Forum</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/create-chat-room}" method="post" th:object="${newChatRoom}">
+                <div class="form-group">
+                    <label for="name">Your Question:</label>
+                    <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                    <small class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></small>
+                </div>
+                <small class="error-message" th:if="${error}" th:text="${error}"></small>
+                <div class="mt-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus-circle mr-2"></i>Create
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Existing Forums</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                <li th:each="chatRoom : ${chatRooms}" class="list-group-item d-flex justify-content-between align-items-center">
+                    <a th:href="@{/chatroom(roomId=${chatRoom.id})}" class="text-decoration-none">
+                        <i class="fas fa-comments mr-2"></i>
+                        <span th:text="${chatRoom.name}">Forum Name</span>
+                    </a>
+                    <button th:if="${currentUser.admin}" class="btn btn-danger btn-sm" onclick="confirmDelete(this)" th:data-room-id="${chatRoom.id}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <form action="/logout" method="get">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this forum?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

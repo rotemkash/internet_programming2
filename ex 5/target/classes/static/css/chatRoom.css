@@ -1,0 +1,45 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+.container {
+    max-width: 800px;
+    margin: 80px auto;
+}
+.error-message {
+    color: red;
+    font-weight: bold;
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+#chatbox {
+    height: 400px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #fff;
+}
+.edit-form, .comment-form, .edit-comment-form {
+    display: none;
+}
+.comments-section {
+    display: none;
+    margin-left: 20px;
+    border-left: 2px solid #ccc;
+    padding-left: 10px;
+}
+.comment-toggle {
+    cursor: pointer;
+    color: #007bff;
+}
+.comment-toggle:hover {
+    text-decoration: underline;
+}
+.admin-badge {
+    background-color: #dc3545;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-left: 5px;
+}

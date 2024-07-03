@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/Login.css">
+
+</head>
+<body>
+<div class="container">
+    <h2>Login</h2>
+
+    <form th:action="@{/login}" method="post">
+        <!-- Username Field -->
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+            <small class="error-message" th:if="${usernameError != null}" th:text="${usernameError}"></small>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+            <small class="error-message" th:if="${passwordError != null}" th:text="${passwordError}"></small>
+        </div>
+
+        <!-- Login Button -->
+        <button type="submit" class="btn btn-lg btn-login btn-block">Login</button>
+    </form>
+
+    <!-- Register Link -->
+    <div class="text-link">
+        <a th:href="@{/register}">Don't have an account? Register here</a>
+    </div>
+</div>
+
+<!-- Include jQuery and Bootstrap JavaScript libraries at the end of the body -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

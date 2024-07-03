@@ -1,0 +1,42 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+.container {
+    max-width: 500px;
+    margin-top: 100px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 00px 00px 15px 00px rgba(0,0,0,0.1);
+}
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+label {
+    font-weight: bold;
+}
+.btn-register {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #ffffff;
+    font-size: 1.2rem;
+    padding: 12px 24px;
+}
+.btn-register:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+.text-link {
+    text-align: center;
+    margin-top: 20px;
+}
+.error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}

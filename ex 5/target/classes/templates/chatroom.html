@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Forum</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/css/chatRoom.css"/>
+    <script src="/js/chatRoom.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${chatRoom.name}" class="my-4">Forum</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Welcome, <span th:text="${username}">Username</span>!</h5>
+        </div>
+    </div>
+
+    <div id="chatbox" class="mb-4">
+        <div th:each="message : ${messages}" class="mb-2">
+            <div th:with="colorIndex=${message.user.id % 21}">
+                <strong th:text="${message.user.username}" th:style="'font-weight: bold; color: hsl(' + (${colorIndex} * 20) + ', 70%, 50%);'">Username</strong>
+                <span th:if="${message.user.isAdmin()}" class="admin-badge">Admin</span>:
+            </div>
+            <span th:text="${message.content}" th:id="'message-content-' + ${message.id}">Message content</span>
+            <small class="text-muted" th:text="${#temporals.format(message.timestamp, 'dd/MM/yyyy HH:mm:ss')}">Timestamp</small>
+            <small th:if="${message.edited}" class="text-muted">(edited)</small>
+
+            <div th:if="${message.user.id == currentUser.id || currentUser.isAdmin()}" class="mt-1">
+                <button th:if="${message.user.id == currentUser.id}" th:onclick="'showEditForm(' + ${message.id} + ')'" class="btn btn-primary btn-sm">Edit</button>
+                <button th:onclick="'confirmDeleteMessage(' + ${message.id} + ')'" class="btn btn-danger btn-sm">Delete</button>
+                <div th:id="'edit-form-' + ${message.id}" class="edit-form mt-2">
+                    <form th:action="@{/sendMessage}" method="post">
+                        <input type="hidden" name="roomId" th:value="${chatRoom.id}" />
+                        <input type="hidden" name="messageId" th:value="${message.id}" />
+                        <label>
+                            <textarea name="content" th:text="${message.content}" class="form-control edit-message-content" rows="2" maxlength="250" placeholder="Edit your message here"></textarea>
+                        </label>
+                        <small class="text-muted"><span class="edit-char-count">0</span>/250 characters</small>
+                        <div class="error-message" th:if="${messageError}" th:text="${messageError}"></div>
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-success btn-sm">Save</button>
+                            <button type="button" th:onclick="'hideEditForm(' + ${message.id} + ')'" class="btn btn-danger btn-sm">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="comment-toggle" th:onclick="'toggleComments(' + ${message.id} + ')'" th:id="'comment-toggle-' + ${message.id}">
+                <i class="fas fa-chevron-down"></i> Show comments (<span th:text="${#lists.size(message.comments)}">0</span>)
+            </div>
+
+            <div th:id="'comments-section-' + ${message.id}" class="comments-section">
+                <h6>Comments:</h6>
+                <ul class="list-unstyled">
+                    <li th:each="comment : ${message.comments}" class="mb-1">
+                        <strong th:text="${comment.user.username}" th:style="'font-weight: bold; color: hsl(' + (${comment.user.id % 21} * 20) + ', 70%, 50%);'"></strong>
+                        <span th:if="${comment.user.isAdmin()}" class="admin-badge">Admin</span>:
+                        <span th:text="${comment.content}" th:id="'comment-content-' + ${comment.id}" style="font-size: 12px;"></span>
+                        <small class="text-muted" th:text="${#temporals.format(comment.timestamp, 'dd/MM/yyyy HH:mm:ss')}"></small>
+                        <small th:if="${comment.edited}" class="text-muted">(edited)</small>
+
+                        <div th:if="${comment.user.id == currentUser.id || currentUser.isAdmin()}" class="mt-1">
+                            <button th:if="${comment.user.id == currentUser.id}" th:onclick="'showEditCommentForm(' + ${comment.id} + ')'" class="btn btn-primary btn-sm">Edit</button>
+                            <button th:onclick="'confirmDeleteComment(' + ${comment.id} + ')'" class="btn btn-danger btn-sm">Delete</button>
+                            <div th:id="'edit-comment-form-' + ${comment.id}" class="edit-comment-form mt-2">
+                                <form th:action="@{/editComment}" method="post">
+                                    <input type="hidden" name="commentId" th:value="${comment.id}" />
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="text" name="content" th:value="${comment.content}" class="form-control form-control-sm" placeholder="Edit comment" required>
+                                        </label>
+                                        <div class="error-message" th:if="${commentError != null and commentErrorMessageId == message.id}" th:text="${commentError}"></div>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                    <button type="button" th:onclick="'hideEditCommentForm(' + ${comment.id} + ')'" class="btn btn-sm btn-danger">Cancel</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <div>
+                    <button th:onclick="'showCommentForm(' + ${message.id} + ')'" class="btn btn-sm btn-primary">Add Comment</button>
+                    <div th:id="'comment-form-' + ${message.id}" class="comment-form mt-2">
+                        <form th:action="@{/postComment}" method="post">
+                            <input type="hidden" name="messageId" th:value="${message.id}" />
+                            <div class="form-group">
+                                <label>
+                                    <input type="text" name="content" class="form-control form-control-sm" placeholder="Add a comment" required>
+                                </label>
+                                <div class="error-message" th:if="${commentError != null and commentErrorMessageId == message.id}" th:text="${commentError}"></div>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-success">Post</button>
+                            <button type="button" th:onclick="'hideCommentForm(' + ${message.id} + ')'" class="btn btn-sm btn-danger">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form th:action="@{/sendMessage}" method="post" th:object="${newMessage}" class="mb-4">
+        <input type="hidden" name="roomId" th:value="${chatRoom.id}" />
+        <div class="form-group">
+            <label for="messageContent"></label><textarea th:field="*{content}" class="form-control" rows="3" maxlength="250" id="messageContent" placeholder="Add your message here"></textarea>
+            <small class="text-muted"><span id="charCount">0</span>/250 characters</small>
+            <div class="error-message" th:if="${messageError != null}" th:text="${messageError}"></div>
+        </div>
+        <button type="submit" class="btn btn-success">Send</button>
+    </form>
+
+    <a th:href="@{/chat-rooms}" class="btn btn-secondary">Back to Forums List</a>
+</div>
+
+<!-- Delete Message Confirmation Modal -->
+<div class="modal fade" id="deleteMessageModal" tabindex="-1" role="dialog" aria-labelledby="deleteMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteMessageModalLabel">Confirm Message Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this message?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteMessageBtn">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Comment Confirmation Modal -->
+<div class="modal fade" id="deleteCommentModal" tabindex="-1" role="dialog" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCommentModalLabel">Confirm Comment Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this comment?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteCommentBtn">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
